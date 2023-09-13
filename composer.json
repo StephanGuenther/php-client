@@ -5,7 +5,8 @@
         "php": "~7.0 || ~8.0.0 || ~8.1.0",
         "firebase/php-jwt": ">=5.0",
         "guzzlehttp/guzzle": "~7.2 || ~5.3 || ~6.0",
-        "guzzlehttp/psr7": ">=1.2"
+        "guzzlehttp/psr7": ">=1.2",
+        "ext-json": "*"
     },
     "type": "library",
     "version": "0.1.2.6",

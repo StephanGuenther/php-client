@@ -3,6 +3,9 @@
 namespace Mapp\Connect;
 
 use \Firebase\JWT\JWT;
+use \GuzzleHttp\HandlerStack;
+use \GuzzleHttp\Handler\CurlHandler;
+use \GuzzleHttp\Middleware;
 use \Psr\Http\Message\RequestInterface;
 
 class Client {
@@ -19,8 +22,39 @@ class Client {
     $this->integrationId = $integrationId;
     $this->secret = $secret;
 
+    $stack = new HandlerStack();
+    $stack->setHandler(new CurlHandler());
+
+    $middleware = Middleware::tap(function (RequestInterface $request) {
+      if(getenv('MAPP_CONNECT_CLIENT_DEBUG') === 'debug' && !empty(getenv('MAPP_CONNECT_CLIENT_LOG'))) {
+        $body = (string) $request->getBody();
+
+        if(!empty($body)) {
+          $body = json_decode($body, JSON_OBJECT_AS_ARRAY);
+        }
+
+        $debugData = array(
+            'url' => $request->getUri(),
+            'body' => $body,
+            'headers' => $request->getHeaders(),
+        );
+
+        $logData = '';
+        $logData .= '[' . date('Y-m-d H:i:s') . ']';
+        $logData .= ' ';
+        $logData .= $request->getUri();
+        $logData .= ' ';
+        $logData .=  json_encode($debugData);
+
+        $handle = fopen(getenv('MAPP_CONNECT_CLIENT_LOG'), "a+");
+        fwrite($handle, $logData . "\n");
+        fclose($handle);
+      }
+    });
+
     $handlerStack = \GuzzleHttp\HandlerStack::create(\GuzzleHttp\choose_handler());
     $handlerStack->push($this->handleAuthorizationHeader());
+    $handlerStack->push($middleware);
 
     $this->client = new \GuzzleHttp\Client([
       'base_uri' => $this->baseUrl,
