@@ -1,5 +1,5 @@
 {
-    "name": "mappconnect/client",
+    "name": "mapp-cloud/php-connect-client",
     "description": "Mapp Connect APIs Client Library",
     "require": {
         "php": "~7.0 || ~8.0.0 || ~8.1.0",
